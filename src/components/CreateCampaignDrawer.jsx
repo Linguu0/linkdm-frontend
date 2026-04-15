@@ -528,7 +528,10 @@ export default function CreateCampaignDrawer({ isOpen, onClose, onSubmit, isSubm
                     <div className="iphone-template-img">
                       {slides[0]?.image ? <img src={slides[0].image} alt="Preview" /> : <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>}
                     </div>
-                    {slides[0]?.title && <div className="iphone-template-text">{slides[0].title}</div>}
+                    <div className="iphone-template-title-container">
+                      {slides[0]?.title && <div className="iphone-template-text">{slides[0].title}</div>}
+                      <div className="iphone-template-subtitle">Sent by Randombaaz</div>
+                    </div>
                     <div className="iphone-template-btn">{slides[0]?.btnLabel || 'Button Text'}</div>
                   </div>
                 )}

@@ -807,10 +807,20 @@
   object-fit: cover;
 }
 
-.iphone-template-text {
+.iphone-template-title-container {
   padding: 10px 14px;
+}
+
+.iphone-template-text {
   font-size: 14px;
+  font-weight: 600;
   color: #fff;
+  margin-bottom: 4px;
+}
+
+.iphone-template-subtitle {
+  font-size: 13px;
+  color: #8e8e93;
 }
 
 .iphone-template-btn {
