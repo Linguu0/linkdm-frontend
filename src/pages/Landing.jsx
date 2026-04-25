@@ -1,8 +1,23 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import '../styles/landing.css';
 
 export default function Landing() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const auth = params.get('auth');
+    const igUserId = params.get('ig_user_id');
+
+    if (auth === 'success' && igUserId) {
+      localStorage.setItem('linkdm_token', igUserId);
+      localStorage.setItem('linkdm_username', 'Creator');
+      navigate('/dashboard', { replace: true });
+    }
+  }, [location, navigate]);
   return (
     <div className="landing">
       <Navbar variant="landing" />
@@ -25,14 +40,14 @@ export default function Landing() {
           They instantly get your DM. Zero effort.
         </p>
 
-        <Link to="/dashboard" className="btn-primary hero-cta">
+        <a href="https://linkdm-backend.onrender.com/auth/instagram" className="btn-primary hero-cta">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
             <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
             <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
           </svg>
           <span>Connect Instagram — It&apos;s Free</span>
-        </Link>
+        </a>
 
         <div className="hero-trust">
           <span><span className="check">✓</span> No credit card</span>

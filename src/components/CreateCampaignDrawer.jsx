@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { fetchPostPreview } from '../api';
+import FlowCanvas from './FlowBuilder/FlowCanvas';
 
 const TRIGGER_TYPES = [
   { value: 'reel_comment', label: 'Reel Comment' },
@@ -12,6 +13,7 @@ const DM_TYPES = [
   { value: 'text_message', label: 'Text Message' },
   { value: 'button_template', label: 'Button Template' },
   { value: 'quick_replies', label: 'Quick Replies' },
+  { value: 'flow_builder', label: 'Flow Builder ✨' },
 ];
 
 export default function CreateCampaignDrawer({ isOpen, onClose, onSubmit, isSubmitting, initialTarget }) {
@@ -29,6 +31,9 @@ export default function CreateCampaignDrawer({ isOpen, onClose, onSubmit, isSubm
 
   // -- Quick Replies State --
   const [quickReplies, setQuickReplies] = useState([{ text: '' }]);
+
+  // -- Flow Builder State --
+  const [flowData, setFlowData] = useState(null);
 
   // Tab 2: Trigger Setup
   const [triggerType, setTriggerType] = useState('reel_comment');
@@ -86,6 +91,7 @@ export default function CreateCampaignDrawer({ isOpen, onClose, onSubmit, isSubm
     setSlides([{ id: 1, image: '', title: '', destination: 'url', url: '', btnLabel: '' }]);
     setActiveSlide(0);
     setQuickReplies([{ text: '' }]);
+    setFlowData(null);
     setTriggerType('reel_comment');
     setKeywords([]);
     setKeywordInput('');
@@ -223,6 +229,7 @@ export default function CreateCampaignDrawer({ isOpen, onClose, onSubmit, isSubm
       dm_type: dmType,
       button_template_data: dmType === 'button_template' ? slides : null,
       quick_replies_data: dmType === 'quick_replies' ? quickReplies : null,
+      flow_data: dmType === 'flow_builder' ? flowData : null,
       exclude_keywords: useExclude ? excludeKeywords : null,
       send_once_per_user: sendOnce,
       exclude_mentions: excludeMentions,
@@ -368,6 +375,17 @@ export default function CreateCampaignDrawer({ isOpen, onClose, onSubmit, isSubm
                     </div>
                   </div>
                 )}
+
+                {dmType === 'flow_builder' && (
+                  <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                    <label className="form-label">Flow Builder</label>
+                    <p className="form-helper" style={{marginBottom: '12px'}}>Drag and drop nodes to build your conversation flow. Connect the Trigger to a Message.</p>
+                    <FlowCanvas 
+                      keyword={keywords[0] || 'LINK'}
+                      onChange={(data) => setFlowData(data)}
+                    />
+                  </div>
+                )}
               </>
             )}
 
@@ -448,7 +466,7 @@ export default function CreateCampaignDrawer({ isOpen, onClose, onSubmit, isSubm
                     </div>
                     <div style={{ marginBottom: 12 }}>
                       <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, textTransform: 'uppercase', letterSpacing: 1 }}>DM Type</span>
-                      <p style={{ color: '#fff', marginTop: 4, fontWeight: 500 }}>{dmType === 'text_message' ? '💬 Text Message' : dmType === 'button_template' ? '🔘 Button Template' : '⚡ Quick Replies'}</p>
+                      <p style={{ color: '#fff', marginTop: 4, fontWeight: 500 }}>{dmType === 'text_message' ? '💬 Text Message' : dmType === 'button_template' ? '🔘 Button Template' : dmType === 'flow_builder' ? '✨ Flow Builder' : '⚡ Quick Replies'}</p>
                     </div>
                     <div style={{ marginBottom: 12 }}>
                       <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, textTransform: 'uppercase', letterSpacing: 1 }}>Keywords</span>
@@ -520,6 +538,12 @@ export default function CreateCampaignDrawer({ isOpen, onClose, onSubmit, isSubm
                 {dmType === 'text_message' && (
                   <div className="iphone-bubble iphone-outgoing">
                     {message || 'Start typing a message...'}
+                  </div>
+                )}
+
+                {dmType === 'flow_builder' && (
+                  <div className="iphone-bubble iphone-outgoing">
+                    {flowData?.nodes?.find(n => n.type === 'messageNode')?.data?.text || 'Flow Message Preview...'}
                   </div>
                 )}
 
