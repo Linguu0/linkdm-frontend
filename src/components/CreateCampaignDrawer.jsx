@@ -543,7 +543,7 @@ export default function CreateCampaignDrawer({ isOpen, onClose, onSubmit, isSubm
 
                 {dmType === 'flow_builder' && (
                   <div className="iphone-bubble iphone-outgoing">
-                    {flowData?.nodes?.find(n => n.type === 'messageNode')?.data?.text || 'Flow Message Preview...'}
+                    {flowData?.steps?.find(s => s.type === 'message')?.text || 'Flow Message Preview...'}
                   </div>
                 )}
 

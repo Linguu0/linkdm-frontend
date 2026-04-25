@@ -1,151 +1,218 @@
-import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
-import {
-  ReactFlow,
-  ReactFlowProvider,
-  addEdge,
-  useNodesState,
-  useEdgesState,
-  Controls,
-  Background,
-} from '@xyflow/react';
-import '@xyflow/react/dist/style.css';
+import { useState, useCallback, useEffect } from 'react';
+import '../../styles/flow-builder.css';
 
-import { v4 as uuidv4 } from 'uuid';
-import Sidebar from './Sidebar';
-import TriggerNode from './nodes/TriggerNode';
-import MessageNode from './nodes/MessageNode';
+const STEP_TYPES = [
+  { type: 'message', label: 'Send Message', icon: '💬', color: '#a78bfa' },
+  { type: 'delay', label: 'Add Delay', icon: '⏱️', color: '#fbbf24' },
+  { type: 'condition', label: 'Add Condition', icon: '🔀', color: '#34d399' },
+];
+
+let stepIdCounter = 1;
+function newId() {
+  return `step-${Date.now()}-${stepIdCounter++}`;
+}
+
+function TriggerCard({ keyword }) {
+  return (
+    <div className="fb-card fb-trigger-card">
+      <div className="fb-card-icon" style={{ background: 'rgba(124,58,237,0.15)', color: '#a78bfa' }}>⚡</div>
+      <div className="fb-card-content">
+        <div className="fb-card-label">TRIGGER</div>
+        <div className="fb-card-title">When someone comments</div>
+        <div className="fb-card-keyword">{keyword || 'LINK'}</div>
+      </div>
+    </div>
+  );
+}
+
+function MessageStep({ step, onUpdate, onDelete }) {
+  return (
+    <div className="fb-card fb-message-card">
+      <div className="fb-card-header">
+        <div className="fb-card-icon" style={{ background: 'rgba(167,139,250,0.15)', color: '#a78bfa' }}>💬</div>
+        <span className="fb-card-type">Send Message</span>
+        <button className="fb-delete-btn" onClick={onDelete} title="Delete step">✕</button>
+      </div>
+      <textarea
+        className="fb-message-input"
+        placeholder="Type your message here..."
+        value={step.text || ''}
+        onChange={(e) => onUpdate({ ...step, text: e.target.value })}
+        rows={3}
+      />
+      <div className="fb-char-count">{(step.text || '').length} / 1000</div>
+    </div>
+  );
+}
+
+function DelayStep({ step, onUpdate, onDelete }) {
+  return (
+    <div className="fb-card fb-delay-card">
+      <div className="fb-card-header">
+        <div className="fb-card-icon" style={{ background: 'rgba(251,191,36,0.15)', color: '#fbbf24' }}>⏱️</div>
+        <span className="fb-card-type">Delay</span>
+        <button className="fb-delete-btn" onClick={onDelete} title="Delete step">✕</button>
+      </div>
+      <div className="fb-delay-controls">
+        <span>Wait for</span>
+        <input
+          type="number"
+          min="1"
+          max="1440"
+          value={step.duration || 1}
+          onChange={(e) => onUpdate({ ...step, duration: parseInt(e.target.value) || 1 })}
+          className="fb-delay-input"
+        />
+        <select
+          value={step.unit || 'minutes'}
+          onChange={(e) => onUpdate({ ...step, unit: e.target.value })}
+          className="fb-delay-select"
+        >
+          <option value="seconds">seconds</option>
+          <option value="minutes">minutes</option>
+          <option value="hours">hours</option>
+        </select>
+      </div>
+    </div>
+  );
+}
+
+function ConditionStep({ step, onUpdate, onDelete }) {
+  return (
+    <div className="fb-card fb-condition-card">
+      <div className="fb-card-header">
+        <div className="fb-card-icon" style={{ background: 'rgba(52,211,153,0.15)', color: '#34d399' }}>🔀</div>
+        <span className="fb-card-type">Condition</span>
+        <button className="fb-delete-btn" onClick={onDelete} title="Delete step">✕</button>
+      </div>
+      <div className="fb-condition-controls">
+        <span>If user replies with</span>
+        <input
+          type="text"
+          placeholder="e.g. YES, SURE, OK"
+          value={step.matchKeywords || ''}
+          onChange={(e) => onUpdate({ ...step, matchKeywords: e.target.value })}
+          className="fb-condition-input"
+        />
+      </div>
+    </div>
+  );
+}
+
+function AddStepButton({ onAdd }) {
+  const [showMenu, setShowMenu] = useState(false);
+
+  return (
+    <div className="fb-add-step-wrapper">
+      <div className="fb-connector-line" />
+      {showMenu ? (
+        <div className="fb-add-menu">
+          {STEP_TYPES.map((st) => (
+            <button
+              key={st.type}
+              className="fb-add-menu-item"
+              onClick={() => { onAdd(st.type); setShowMenu(false); }}
+            >
+              <span className="fb-add-menu-icon">{st.icon}</span>
+              <span>{st.label}</span>
+            </button>
+          ))}
+          <button className="fb-add-menu-cancel" onClick={() => setShowMenu(false)}>Cancel</button>
+        </div>
+      ) : (
+        <button className="fb-add-btn" onClick={() => setShowMenu(true)}>
+          <span>+</span> Add Step
+        </button>
+      )}
+    </div>
+  );
+}
 
 export default function FlowCanvas({ initialData, keyword, onChange }) {
-  const reactFlowWrapper = useRef(null);
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  const [reactFlowInstance, setReactFlowInstance] = useState(null);
+  const [steps, setSteps] = useState([]);
 
-  // We need to pass down callbacks to nodes so they can update their own data in the state
-  const onNodeDataChange = useCallback((id, newText) => {
-    setNodes((nds) =>
-      nds.map((node) => {
-        if (node.id === id) {
-          node.data = {
-            ...node.data,
-            text: newText,
-          };
-        }
-        return node;
-      })
-    );
-  }, [setNodes]);
-
-  const nodeTypes = useMemo(() => ({
-    triggerNode: TriggerNode,
-    messageNode: (props) => <MessageNode {...props} data={{...props.data, onChange: (val) => onNodeDataChange(props.id, val)}} />,
-  }), [onNodeDataChange]);
-
-  // Initialize flow data
+  // Initialize from saved data
   useEffect(() => {
-    if (initialData && initialData.nodes && initialData.edges) {
-      setNodes(initialData.nodes);
-      setEdges(initialData.edges);
+    if (initialData && initialData.steps && initialData.steps.length > 0) {
+      setSteps(initialData.steps);
     } else {
-      // Default initial state
-      setNodes([
-        {
-          id: 'trigger-1',
-          type: 'triggerNode',
-          position: { x: 50, y: 150 },
-          data: { keyword: keyword || 'LINK' },
-          deletable: false,
-        },
-      ]);
-      setEdges([]);
+      // Default: one message step
+      setSteps([{ id: newId(), type: 'message', text: '' }]);
     }
-  }, [initialData, keyword, setNodes, setEdges]);
+  }, [initialData]);
 
-  // Trigger onChange when flow state updates
+  // Notify parent of changes
   useEffect(() => {
-    if (reactFlowInstance) {
-      // Small timeout to allow state to settle
+    if (onChange) {
       const timer = setTimeout(() => {
-        if (onChange) {
-          onChange({ nodes, edges });
-        }
+        onChange({ steps });
       }, 300);
       return () => clearTimeout(timer);
     }
-  }, [nodes, edges, reactFlowInstance, onChange]);
+  }, [steps, onChange]);
 
-  // Update trigger node if keyword changes
-  useEffect(() => {
-    setNodes((nds) =>
-      nds.map((n) => {
-        if (n.id === 'trigger-1') {
-          n.data = { ...n.data, keyword };
-        }
-        return n;
-      })
-    );
-  }, [keyword, setNodes]);
+  const addStep = useCallback((type, afterIndex) => {
+    const newStep = { id: newId(), type };
+    if (type === 'message') newStep.text = '';
+    if (type === 'delay') { newStep.duration = 1; newStep.unit = 'minutes'; }
+    if (type === 'condition') newStep.matchKeywords = '';
 
-  const onConnect = useCallback(
-    (params) => setEdges((eds) => addEdge({ ...params, animated: true, style: { stroke: '#a78bfa', strokeWidth: 2 } }, eds)),
-    [setEdges],
-  );
-
-  const onDragOver = useCallback((event) => {
-    event.preventDefault();
-    event.dataTransfer.dropEffect = 'move';
+    setSteps((prev) => {
+      const copy = [...prev];
+      copy.splice(afterIndex + 1, 0, newStep);
+      return copy;
+    });
   }, []);
 
-  const onDrop = useCallback(
-    (event) => {
-      event.preventDefault();
+  const updateStep = useCallback((index, updatedStep) => {
+    setSteps((prev) => prev.map((s, i) => (i === index ? updatedStep : s)));
+  }, []);
 
-      const type = event.dataTransfer.getData('application/reactflow');
-      if (typeof type === 'undefined' || !type) {
-        return;
-      }
+  const deleteStep = useCallback((index) => {
+    setSteps((prev) => {
+      if (prev.length <= 1) return prev; // Keep at least one step
+      return prev.filter((_, i) => i !== index);
+    });
+  }, []);
 
-      const position = reactFlowInstance.screenToFlowPosition({
-        x: event.clientX,
-        y: event.clientY,
-      });
+  const renderStep = (step, index) => {
+    const props = {
+      key: step.id,
+      step,
+      onUpdate: (updated) => updateStep(index, updated),
+      onDelete: () => deleteStep(index),
+    };
 
-      const newNode = {
-        id: uuidv4(),
-        type,
-        position,
-        data: { text: '' },
-      };
-
-      setNodes((nds) => nds.concat(newNode));
-    },
-    [reactFlowInstance, setNodes],
-  );
+    switch (step.type) {
+      case 'message': return <MessageStep {...props} />;
+      case 'delay': return <DelayStep {...props} />;
+      case 'condition': return <ConditionStep {...props} />;
+      default: return <MessageStep {...props} />;
+    }
+  };
 
   return (
-    <div className="flow-builder-container">
-      <ReactFlowProvider>
-        <Sidebar />
-        <div className="reactflow-wrapper" ref={reactFlowWrapper}>
-          <ReactFlow
-            nodes={nodes}
-            edges={edges}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
-            onInit={setReactFlowInstance}
-            onDrop={onDrop}
-            onDragOver={onDragOver}
-            nodeTypes={nodeTypes}
-            fitView
-            fitViewOptions={{ padding: 0.2 }}
-            proOptions={{ hideAttribution: true }}
-          >
-            <Controls style={{ bottom: 20, right: 20, backgroundColor: '#1f2025', border: '1px solid #333' }} />
-            <Background color="#333" gap={16} />
-          </ReactFlow>
+    <div className="fb-flow-builder">
+      <div className="fb-flow-steps">
+        {/* Trigger Card */}
+        <TriggerCard keyword={keyword} />
+
+        {/* Steps */}
+        {steps.map((step, index) => (
+          <div key={step.id}>
+            <AddStepButton onAdd={(type) => addStep(type, index - 1)} />
+            {renderStep(step, index)}
+          </div>
+        ))}
+
+        {/* Add step at the end */}
+        <AddStepButton onAdd={(type) => addStep(type, steps.length - 1)} />
+
+        <div className="fb-end-marker">
+          <div className="fb-connector-line" />
+          <div className="fb-end-dot">END</div>
         </div>
-      </ReactFlowProvider>
+      </div>
     </div>
   );
 }
