@@ -200,7 +200,15 @@ export default function Dashboard() {
             </button>
           </div>
         )}
-        {/* ═══ STATS ROW ═══ */}
+
+        {!loadError && (
+          <div className="header-row">
+            <h1>Dashboard <span style={{fontSize: '12px', opacity: 0.5, verticalAlign: 'middle', marginLeft: '10px'}}>v2.1.0</span></h1>
+            <button className="btn-primary" onClick={() => setDrawerOpen(true)}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+              <span>Create Campaign</span>
+            </button>
+          </div>
         {!loadError && (
         <div className="stats-row">
           <StatsCard

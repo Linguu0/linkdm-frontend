@@ -362,7 +362,7 @@ export default function CreateCampaignDrawer({ isOpen, onClose, onSubmit, isSubm
                 {dmType === 'flow_builder' && (
                   <div className="form-group" style={{ gridColumn: '1 / -1' }}>
                     <label className="form-label">Flow Builder</label>
-                    <p className="form-helper" style={{marginBottom: '12px'}}>Drag and drop nodes to build your conversation flow. Connect the Trigger to a Message.</p>
+                    <p className="form-helper" style={{marginBottom: '12px'}}>Your conversation flow runs in a vertical sequence. Add steps to send messages or add delays.</p>
                     <FlowCanvas 
                       keyword={keywords[0] || 'LINK'}
                       onChange={(data) => setFlowData(data)}
