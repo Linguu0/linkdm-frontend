@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { fetchPostPreview } from '../api';
+
 import FlowCanvas from './FlowBuilder/FlowCanvas';
 
 const TRIGGER_TYPES = [
@@ -53,24 +53,24 @@ export default function CreateCampaignDrawer({ isOpen, onClose, onSubmit, isSubm
   const [targetType, setTargetType] = useState('all_posts');
   const [postUrl, setPostUrl] = useState('');
   const [postPreview, setPostPreview] = useState(null);
-  const [fetchingPost, setFetchingPost] = useState(false);
-  const [postError, setPostError] = useState('');
   const [autoCommentReply, setAutoCommentReply] = useState(true);
 
   const MAX_MSG_LENGTH = 1000;
 
   useEffect(() => {
     if (isOpen) {
-      if (initialTarget) {
-        setTargetType('specific_post');
-        setPostUrl(initialTarget.id || '');
-        setPostPreview(initialTarget);
-      } else {
-        setTargetType('all_posts');
-        setPostUrl('');
-        setPostPreview(null);
-      }
-      setActiveTab(0);
+      setTimeout(() => {
+        if (initialTarget) {
+          setTargetType('specific_post');
+          setPostUrl(initialTarget.id || '');
+          setPostPreview(initialTarget);
+        } else {
+          setTargetType('all_posts');
+          setPostUrl('');
+          setPostPreview(null);
+        }
+        setActiveTab(0);
+      }, 0);
     }
   }, [isOpen, initialTarget]);
 
@@ -103,7 +103,6 @@ export default function CreateCampaignDrawer({ isOpen, onClose, onSubmit, isSubm
     setTargetType('all_posts');
     setPostUrl('');
     setPostPreview(null);
-    setPostError('');
     setAutoCommentReply(true);
   }
 
@@ -189,22 +188,6 @@ export default function CreateCampaignDrawer({ isOpen, onClose, onSubmit, isSubm
     const newReplies = [...quickReplies];
     newReplies[index].text = val;
     setQuickReplies(newReplies);
-  }
-
-  // ------- Post Preview Fetcher -------
-  async function handleFetchPost() {
-    if (!postUrl.trim()) return;
-    setFetchingPost(true);
-    setPostError('');
-    setPostPreview(null);
-    try {
-      const data = await fetchPostPreview(postUrl.trim());
-      setPostPreview(data);
-    } catch (err) {
-      setPostError(err.message || 'Could not fetch post. Check the URL and try again.');
-    } finally {
-      setFetchingPost(false);
-    }
   }
 
   function extractMediaId(url) {

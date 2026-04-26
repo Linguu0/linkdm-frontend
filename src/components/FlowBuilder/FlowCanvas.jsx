@@ -133,12 +133,14 @@ export default function FlowCanvas({ initialData, keyword, onChange }) {
 
   // Initialize from saved data
   useEffect(() => {
-    if (initialData && initialData.steps && initialData.steps.length > 0) {
-      setSteps(initialData.steps);
-    } else {
-      // Default: one message step
-      setSteps([{ id: newId(), type: 'message', text: '' }]);
-    }
+    setTimeout(() => {
+      if (initialData && initialData.steps && initialData.steps.length > 0) {
+        setSteps(initialData.steps);
+      } else {
+        // Default: one message step
+        setSteps([{ id: newId(), type: 'message', text: '' }]);
+      }
+    }, 0);
   }, [initialData]);
 
   // Notify parent of changes

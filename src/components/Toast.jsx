@@ -1,7 +1,9 @@
-import { useState, useEffect, useCallback, createContext, useContext } from 'react';
+import { useState, createContext, useContext, useCallback } from 'react';
+import '../styles/components.css';
 
 const ToastContext = createContext(null);
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useToast() {
   return useContext(ToastContext);
 }

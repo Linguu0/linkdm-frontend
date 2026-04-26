@@ -95,7 +95,8 @@ export default function Dashboard() {
         console.error('❌ Failed to fetch media posts:', postsData.reason);
         setPostsError(postsData.reason?.message || 'Failed to fetch media posts');
       }
-    } catch (err) {
+    } catch (e) {
+      console.error(e);
       setLoadError(true);
       addToast('Failed to load data', 'error');
     } finally {
@@ -111,8 +112,8 @@ export default function Dashboard() {
       setCampaigns((prev) => [...prev, result.campaign || result]);
       setDrawerOpen(false);
       addToast('Campaign created successfully!', 'success');
-    } catch (err) {
-      addToast(err.message || 'Failed to create campaign', 'error');
+    } catch (e) {
+      addToast(e.message || 'Failed to create campaign', 'error');
     } finally {
       setSubmitting(false);
     }
@@ -125,8 +126,8 @@ export default function Dashboard() {
         prev.map((c) => (c.id === id ? { ...c, is_active: isActive } : c))
       );
       addToast(isActive ? 'Campaign activated' : 'Campaign paused', 'success');
-    } catch (err) {
-      addToast('Failed to update campaign', 'error');
+    } catch {
+      addToast('Failed to toggle campaign status', 'error');
     }
   }
 
@@ -136,7 +137,8 @@ export default function Dashboard() {
       setCampaigns((prev) => prev.filter((c) => c.id !== id));
       setConfirmDelete(null);
       addToast('Campaign deleted', 'success');
-    } catch (err) {
+    } catch (e) {
+      console.error(e);
       addToast('Failed to delete campaign', 'error');
     }
   }
