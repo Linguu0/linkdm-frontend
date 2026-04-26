@@ -209,8 +209,10 @@ export default function Dashboard() {
               <span>Create Campaign</span>
             </button>
           </div>
+        )}
+
         {!loadError && (
-        <div className="stats-row">
+          <div className="stats-row">
           <StatsCard
             label="Total Campaigns"
             value={campaigns.length}
