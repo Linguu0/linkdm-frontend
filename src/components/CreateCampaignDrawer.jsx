@@ -22,7 +22,7 @@ export default function CreateCampaignDrawer({ isOpen, onClose, onSubmit, isSubm
 
   // Tab 1: DM Setup
   const [name, setName] = useState('');
-  const [dmType, setDmType] = useState('text_message');
+  const [dmType, setDmType] = useState('flow_builder');
   const [message, setMessage] = useState(''); // Used by text & quick replies
   
   // -- Button Template State --
