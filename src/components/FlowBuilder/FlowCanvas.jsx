@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import '../../styles/flow-builder.css';
 
 const STEP_TYPES = [
@@ -131,9 +131,14 @@ function AddStepButton({ onAdd }) {
 export default function FlowCanvas({ initialData, keyword, onChange }) {
   const [steps, setSteps] = useState([]);
 
+  const hasInitialized = useRef(false);
+
   // Initialize from saved data
   useEffect(() => {
+    if (hasInitialized.current) return;
+    
     setTimeout(() => {
+      hasInitialized.current = true;
       if (initialData && initialData.steps && initialData.steps.length > 0) {
         setSteps(initialData.steps);
       } else {

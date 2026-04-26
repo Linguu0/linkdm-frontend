@@ -315,7 +315,20 @@
   background: var(--danger-bg);
 }
 
-.campaign-delete-btn svg {
+.campaign-edit-btn {
+  padding: 8px;
+  color: var(--text-muted);
+  border-radius: var(--radius-input);
+  transition: all var(--transition-fast);
+}
+
+.campaign-edit-btn:hover {
+  color: var(--primary-light);
+  background: var(--primary-bg);
+}
+
+.campaign-delete-btn svg,
+.campaign-edit-btn svg {
   width: 18px;
   height: 18px;
 }

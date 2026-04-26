@@ -15,6 +15,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [editingCampaign, setEditingCampaign] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [username, setUsername] = useState('');
@@ -105,15 +106,24 @@ export default function Dashboard() {
     }
   }
 
-  async function handleCreate(data) {
+  async function handleSave(data) {
     setSubmitting(true);
     try {
-      const result = await createCampaign(data);
-      setCampaigns((prev) => [...prev, result.campaign || result]);
+      if (editingCampaign) {
+        const result = await updateCampaign(editingCampaign.id, data);
+        setCampaigns((prev) =>
+          prev.map((c) => (c.id === editingCampaign.id ? { ...c, ...data, ...(result.campaign || result) } : c))
+        );
+        addToast('Campaign updated successfully!', 'success');
+      } else {
+        const result = await createCampaign(data);
+        setCampaigns((prev) => [...prev, result.campaign || result]);
+        addToast('Campaign created successfully!', 'success');
+      }
       setDrawerOpen(false);
-      addToast('Campaign created successfully!', 'success');
+      setEditingCampaign(null);
     } catch (e) {
-      addToast(e.message || 'Failed to create campaign', 'error');
+      addToast(e.message || 'Failed to save campaign', 'error');
     } finally {
       setSubmitting(false);
     }
@@ -156,7 +166,14 @@ export default function Dashboard() {
   }
 
   function handleOpenDrawer(targetPost = null) {
+    setEditingCampaign(null);
     setInitialTarget(targetPost);
+    setDrawerOpen(true);
+  }
+
+  function handleEdit(campaign) {
+    setEditingCampaign(campaign);
+    setInitialTarget(null);
     setDrawerOpen(true);
   }
 
@@ -395,6 +412,7 @@ export default function Dashboard() {
                 campaign={campaign}
                 onToggle={handleToggle}
                 onDelete={(id, name) => setConfirmDelete({ id, name })}
+                onEdit={handleEdit}
               />
             ))}
           </div>
@@ -404,10 +422,14 @@ export default function Dashboard() {
       {/* ═══ CREATE DRAWER ═══ */}
       <CreateCampaignDrawer
         isOpen={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-        onSubmit={handleCreate}
+        onClose={() => {
+          setDrawerOpen(false);
+          setEditingCampaign(null);
+        }}
+        onSubmit={handleSave}
         isSubmitting={submitting}
         initialTarget={initialTarget}
+        editingCampaign={editingCampaign}
       />
 
       {/* ═══ CONFIRM DELETE ═══ */}

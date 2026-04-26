@@ -16,7 +16,7 @@ const DM_TYPES = [
   { value: 'flow_builder', label: 'Flow Builder ✨' },
 ];
 
-export default function CreateCampaignDrawer({ isOpen, onClose, onSubmit, isSubmitting, initialTarget }) {
+export default function CreateCampaignDrawer({ isOpen, onClose, onSubmit, isSubmitting, initialTarget, editingCampaign }) {
   const [activeTab, setActiveTab] = useState(0); // 0: DM Setup, 1: Trigger Setup, 2: Settings
   const [closing, setClosing] = useState(false);
 
@@ -59,20 +59,43 @@ export default function CreateCampaignDrawer({ isOpen, onClose, onSubmit, isSubm
 
   useEffect(() => {
     if (isOpen) {
-      setTimeout(() => {
-        if (initialTarget) {
-          setTargetType('specific_post');
-          setPostUrl(initialTarget.id || '');
-          setPostPreview(initialTarget);
-        } else {
-          setTargetType('all_posts');
-          setPostUrl('');
-          setPostPreview(null);
-        }
+      if (editingCampaign) {
+        setName(editingCampaign.name || '');
+        setDmType(editingCampaign.dm_type || 'text_message');
+        setMessage(editingCampaign.dm_message || '');
+        setSlides(editingCampaign.button_template_data || [{ id: 1, image: '', title: '', destination: 'url', url: '', btnLabel: '' }]);
+        setQuickReplies(editingCampaign.quick_replies_data || [{ text: '' }]);
+        setFlowData(editingCampaign.flow_data || null);
+        setTriggerType(editingCampaign.trigger_type || 'reel_comment');
+        
+        const rawKeywords = editingCampaign.keyword || editingCampaign.trigger_keyword || [];
+        setKeywords(Array.isArray(rawKeywords) ? rawKeywords : [rawKeywords]);
+        
+        setUseExclude(!!editingCampaign.exclude_keywords?.length);
+        setExcludeKeywords(editingCampaign.exclude_keywords || []);
+        setSendOnce(editingCampaign.send_once_per_user ?? true);
+        setExcludeMentions(editingCampaign.exclude_mentions ?? false);
+        setTargetType(editingCampaign.target_type || 'all_posts');
+        setPostUrl(editingCampaign.target_media_id || '');
+        setPostPreview(editingCampaign.target_thumbnail ? { id: editingCampaign.target_media_id, thumbnail_url: editingCampaign.target_thumbnail } : null);
+        setAutoCommentReply(editingCampaign.auto_comment_reply ?? true);
         setActiveTab(0);
-      }, 0);
+      } else {
+        setTimeout(() => {
+          if (initialTarget) {
+            setTargetType('specific_post');
+            setPostUrl(initialTarget.id || '');
+            setPostPreview(initialTarget);
+          } else {
+            setTargetType('all_posts');
+            setPostUrl('');
+            setPostPreview(null);
+          }
+          setActiveTab(0);
+        }, 0);
+      }
     }
-  }, [isOpen, initialTarget]);
+  }, [isOpen, initialTarget, editingCampaign]);
 
   function handleClose() {
     setClosing(true);
@@ -231,7 +254,7 @@ export default function CreateCampaignDrawer({ isOpen, onClose, onSubmit, isSubm
       <div className={`drawer ${closing ? 'closing' : ''}`}>
         
         <div className="drawer-header">
-          <h2>New Campaign</h2>
+          <h2>{editingCampaign ? 'Edit Campaign' : 'New Campaign'}</h2>
           <button className="drawer-close" onClick={handleClose}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
           </button>
@@ -364,6 +387,7 @@ export default function CreateCampaignDrawer({ isOpen, onClose, onSubmit, isSubm
                     <label className="form-label">Flow Builder</label>
                     <p className="form-helper" style={{marginBottom: '12px'}}>Your conversation flow runs in a vertical sequence. Add steps to send messages or add delays.</p>
                     <FlowCanvas 
+                      initialData={flowData}
                       keyword={keywords[0] || 'LINK'}
                       onChange={(data) => setFlowData(data)}
                     />
@@ -584,7 +608,7 @@ export default function CreateCampaignDrawer({ isOpen, onClose, onSubmit, isSubm
             <button type="button" className="btn-primary drawer-submit" disabled={isSubmitting || !name.trim()} onClick={handleSave} style={{ opacity: isSubmitting ? 0.7 : 1 }}>
               {isSubmitting ? (
                 <><span className="spinner spinner-sm spinner-inline" style={{ borderTopColor: '#fff', borderColor: 'rgba(255,255,255,0.2)' }}></span> <span>Saving...</span></>
-              ) : <span>Save Campaign</span>}
+              ) : <span>{editingCampaign ? 'Update Campaign' : 'Save Campaign'}</span>}
             </button>
           )}
         </div>

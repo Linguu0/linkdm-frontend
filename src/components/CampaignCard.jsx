@@ -17,7 +17,7 @@ function getColor(name) {
   return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
 }
 
-export default function CampaignCard({ campaign, onToggle, onDelete }) {
+export default function CampaignCard({ campaign, onToggle, onDelete, onEdit }) {
   const firstLetter = campaign.name ? campaign.name[0].toUpperCase() : 'C';
   const dmPreview = campaign.dm_message
     ? campaign.dm_message.substring(0, 50) + (campaign.dm_message.length > 50 ? '…' : '')
@@ -75,6 +75,17 @@ export default function CampaignCard({ campaign, onToggle, onDelete }) {
           />
           <span className="toggle-slider"></span>
         </label>
+
+        <button
+          className="campaign-edit-btn"
+          onClick={() => onEdit(campaign)}
+          title="Edit campaign"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+          </svg>
+        </button>
 
         <button
           className="campaign-delete-btn"
