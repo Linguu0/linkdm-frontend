@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL || 'https://linkdm-backend.onrender.com';
+const API_URL = '/api';
 
 async function request(endpoint, options = {}) {
   const url = `${API_URL}${endpoint}`;
