@@ -201,20 +201,22 @@ export default function Dashboard() {
       <div className="dashboard-content">
         {/* ═══ FULL-PAGE ERROR / RETRY STATE ═══ */}
         {loadError && !loading && (
-          <div className="empty-state">
-            <div className="empty-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <div className="empty-state premium-empty-state animation-fade-in">
+            <div className="empty-icon-pulse">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10" />
-                <line x1="12" y1="8" x2="12" y2="12" />
-                <line x1="12" y1="16" x2="12.01" y2="16" />
+                <path d="M12 8v4" />
+                <path d="M12 16h.01" />
               </svg>
             </div>
-            <h3>Couldn&apos;t reach the server</h3>
-            <p>The backend might be starting up (free tier cold start). Try again in a few seconds.</p>
-            <button className="btn-primary" onClick={loadData}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></svg>
-              <span>Retry</span>
-            </button>
+            <h3>Server is waking up...</h3>
+            <p>Our automation engine is starting its engines (cold start). This usually takes 10-15 seconds on the first load.</p>
+            <div className="error-retry-actions">
+              <button className="btn-primary btn-glow" onClick={loadData}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></svg>
+                <span>Check Again</span>
+              </button>
+            </div>
           </div>
         )}
 

@@ -109,7 +109,7 @@ export default function CreateCampaignDrawer({ isOpen, onClose, onSubmit, isSubm
   function resetForm() {
     setName('');
     setActiveTab(0);
-    setDmType('text_message');
+    setDmType('flow_builder');
     setMessage('');
     setSlides([{ id: 1, image: '', title: '', destination: 'url', url: '', btnLabel: '' }]);
     setActiveSlide(0);
@@ -215,9 +215,11 @@ export default function CreateCampaignDrawer({ isOpen, onClose, onSubmit, isSubm
 
   function extractMediaId(url) {
     if (!url) return null;
-    if (/^\d+$/.test(url.trim())) return url.trim();
-    const match = url.match(/instagram\.com\/(?:reel|p)\/([A-Za-z0-9_-]+)/);
-    return match ? match[1] : null;
+    const trimmed = url.trim();
+    if (/^\d+$/.test(trimmed)) return trimmed;
+    // Extract shortcode
+    const match = trimmed.match(/instagram\.com\/(?:reel|p|tv)\/([A-Za-z0-9_-]+)/);
+    return match ? match[1] : trimmed;
   }
 
   // ------- Submit -------
@@ -399,7 +401,7 @@ export default function CreateCampaignDrawer({ isOpen, onClose, onSubmit, isSubm
             {activeTab === 1 && (
               <>
                 <div className="form-group">
-                  <label className="form-label">Trigger Keyword</label>
+                  <label className="form-label">Trigger Type</label>
                   <div className="segmented-control">
                     {TRIGGER_TYPES.map((t) => (
                       <button key={t.value} type="button" className={`segmented-btn ${triggerType === t.value ? 'active' : ''}`} onClick={() => setTriggerType(t.value)}>{t.label}</button>
@@ -416,6 +418,28 @@ export default function CreateCampaignDrawer({ isOpen, onClose, onSubmit, isSubm
                     <input ref={keywordRef} type="text" className="keyword-raw-input" placeholder={keywords.length===0 ? "LINK, PDF, FREE" : ""} value={keywordInput} onChange={keywordHandlers.onChange} onKeyDown={keywordHandlers.onKeyDown} />
                   </div>
                   <span className="form-helper">Press ENTER or comma to save keyword</span>
+                </div>
+
+                {/* BUG 10 FIX: Target Type Selection */}
+                <div className="form-group">
+                  <label className="form-label">Target</label>
+                  <div className="segmented-control">
+                    <button type="button" className={`segmented-btn ${targetType === 'all_posts' ? 'active' : ''}`} onClick={() => { setTargetType('all_posts'); setPostUrl(''); setPostPreview(null); }}>📌 All Posts</button>
+                    <button type="button" className={`segmented-btn ${targetType === 'specific_post' ? 'active' : ''}`} onClick={() => setTargetType('specific_post')}>🎯 Specific Post</button>
+                  </div>
+                  {targetType === 'specific_post' && !postPreview && (
+                    <div style={{marginTop: 10}}>
+                      <input type="text" className="form-input" placeholder="Paste Instagram post/reel URL or media ID" value={postUrl} onChange={(e) => setPostUrl(e.target.value)} />
+                      <span className="form-helper">e.g. https://www.instagram.com/reel/ABC123/</span>
+                    </div>
+                  )}
+                  {targetType === 'specific_post' && postPreview && (
+                    <div style={{marginTop: 10, display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', background: 'rgba(124,58,237,0.08)', borderRadius: 8, border: '1px solid rgba(124,58,237,0.15)'}}>
+                      {postPreview.thumbnail_url && <img src={postPreview.thumbnail_url} alt="" style={{width: 40, height: 40, borderRadius: 6, objectFit: 'cover'}} />}
+                      <span style={{color: '#a78bfa', fontSize: 13, fontWeight: 500}}>Post ID: {postPreview.id?.substring(0, 12)}...</span>
+                      <button type="button" onClick={() => { setPostPreview(null); setPostUrl(''); }} style={{marginLeft: 'auto', background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: 16}}>✕</button>
+                    </div>
+                  )}
                 </div>
 
                 <div className="form-group" style={{marginTop: 16}}>
@@ -520,9 +544,13 @@ export default function CreateCampaignDrawer({ isOpen, onClose, onSubmit, isSubm
                   alignItems: 'center',
                   gap: 10
                 }}>
-                  <span style={{ fontSize: 18 }}>✨</span>
+                  <span style={{ fontSize: 18 }}>{targetType === 'specific_post' ? '🎯' : '✨'}</span>
                   <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13 }}>
-                    This campaign will monitor <strong style={{ color: '#a78bfa' }}>all posts</strong> for matching keywords and auto-send DMs.
+                    {targetType === 'specific_post' ? (
+                      <>This campaign targets <strong style={{ color: '#a78bfa' }}>1 specific post</strong> for matching keywords and auto-send DMs.</>
+                    ) : (
+                      <>This campaign will monitor <strong style={{ color: '#a78bfa' }}>all posts</strong> for matching keywords and auto-send DMs.</>
+                    )}
                   </span>
                 </div>
               </>
