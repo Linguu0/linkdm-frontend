@@ -1,3 +1,4 @@
+// v2.2.0 — Full system audit fixes applied
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
