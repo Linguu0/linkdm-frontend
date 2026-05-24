@@ -1,5 +1,9 @@
 const API_URL = '/api';
 
+function getIgUserId() {
+  return localStorage.getItem('linkdm_token') || '';
+}
+
 async function request(endpoint, options = {}) {
   const url = `${API_URL}${endpoint}`;
   const config = {
@@ -24,13 +28,15 @@ async function request(endpoint, options = {}) {
 }
 
 export async function getCampaigns() {
-  return request('/campaigns');
+  const igUserId = getIgUserId();
+  return request(`/campaigns${igUserId ? `?ig_user_id=${igUserId}` : ''}`);
 }
 
 export async function createCampaign(data) {
+  const igUserId = getIgUserId();
   return request('/campaigns', {
     method: 'POST',
-    body: JSON.stringify(data),
+    body: JSON.stringify({ ...data, ig_user_id: igUserId || undefined }),
   });
 }
 
@@ -48,7 +54,8 @@ export async function deleteCampaign(id) {
 }
 
 export async function getAnalytics() {
-  return request('/analytics');
+  const igUserId = getIgUserId();
+  return request(`/analytics${igUserId ? `?ig_user_id=${igUserId}` : ''}`);
 }
 
 export async function fetchPostPreview(url) {

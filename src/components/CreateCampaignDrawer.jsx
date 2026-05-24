@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 
 import FlowCanvas from './FlowBuilder/FlowCanvas';
+import { fetchPostPreview } from '../api';
+
 
 const TRIGGER_TYPES = [
   { value: 'reel_comment', label: 'Reel Comment' },
@@ -56,6 +58,30 @@ export default function CreateCampaignDrawer({ isOpen, onClose, onSubmit, isSubm
   const [autoCommentReply, setAutoCommentReply] = useState(true);
 
   const MAX_MSG_LENGTH = 1000;
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+
+  useEffect(() => {
+    if (!postUrl || postUrl.trim() === '') return;
+
+    const handler = setTimeout(async () => {
+      // Check if the input is already a numeric ID
+      if (/^\d+$/.test(postUrl.trim())) return;
+      
+      setIsLoadingPreview(true);
+      try {
+        const preview = await fetchPostPreview(postUrl);
+        if (preview && preview.id) {
+          setPostPreview(preview);
+        }
+      } catch (err) {
+        console.error('Failed to fetch preview', err);
+      } finally {
+        setIsLoadingPreview(false);
+      }
+    }, 800);
+
+    return () => clearTimeout(handler);
+  }, [postUrl]);
 
   useEffect(() => {
     if (isOpen) {
@@ -126,6 +152,7 @@ export default function CreateCampaignDrawer({ isOpen, onClose, onSubmit, isSubm
     setTargetType('all_posts');
     setPostUrl('');
     setPostPreview(null);
+    setIsLoadingPreview(false);
     setAutoCommentReply(true);
   }
 
@@ -431,6 +458,7 @@ export default function CreateCampaignDrawer({ isOpen, onClose, onSubmit, isSubm
                     <div style={{marginTop: 10}}>
                       <input type="text" className="form-input" placeholder="Paste Instagram post/reel URL or media ID" value={postUrl} onChange={(e) => setPostUrl(e.target.value)} />
                       <span className="form-helper">e.g. https://www.instagram.com/reel/ABC123/</span>
+                      {isLoadingPreview && <span className="form-helper" style={{color: '#a78bfa', display: 'block', marginTop: 4}}>Fetching post details...</span>}
                     </div>
                   )}
                   {targetType === 'specific_post' && postPreview && (
