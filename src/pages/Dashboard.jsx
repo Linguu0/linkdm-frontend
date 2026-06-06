@@ -137,8 +137,9 @@ export default function Dashboard() {
         prev.map((c) => (c.id === id ? { ...c, is_active: isActive } : c))
       );
       addToast(isActive ? 'Campaign activated' : 'Campaign paused', 'success');
-    } catch {
-      addToast('Failed to toggle campaign status', 'error');
+    } catch (err) {
+      console.error('Toggle error:', err);
+      addToast(`Failed to toggle: ${err.message || 'Unknown error'}`, 'error');
     }
   }
 
