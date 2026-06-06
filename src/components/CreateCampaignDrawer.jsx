@@ -50,6 +50,7 @@ export default function CreateCampaignDrawer({ isOpen, onClose, onSubmit, isSubm
 
   const [sendOnce, setSendOnce] = useState(true);
   const [excludeMentions, setExcludeMentions] = useState(false);
+  const [followersOnly, setFollowersOnly] = useState(false);
 
   // Tab 3: Settings (Target)
   const [targetType, setTargetType] = useState('all_posts');
@@ -101,6 +102,7 @@ export default function CreateCampaignDrawer({ isOpen, onClose, onSubmit, isSubm
         setExcludeKeywords(editingCampaign.exclude_keywords || []);
         setSendOnce(editingCampaign.send_once_per_user ?? true);
         setExcludeMentions(editingCampaign.exclude_mentions ?? false);
+        setFollowersOnly(editingCampaign.followers_only ?? false);
         setTargetType(editingCampaign.target_type || 'all_posts');
         setPostUrl(editingCampaign.target_media_id || '');
         setPostPreview(editingCampaign.target_thumbnail ? { id: editingCampaign.target_media_id, thumbnail_url: editingCampaign.target_thumbnail } : null);
@@ -149,6 +151,7 @@ export default function CreateCampaignDrawer({ isOpen, onClose, onSubmit, isSubm
     setExcludeInput('');
     setSendOnce(true);
     setExcludeMentions(false);
+    setFollowersOnly(false);
     setTargetType('all_posts');
     setPostUrl('');
     setPostPreview(null);
@@ -268,6 +271,7 @@ export default function CreateCampaignDrawer({ isOpen, onClose, onSubmit, isSubm
       exclude_keywords: useExclude ? excludeKeywords : null,
       send_once_per_user: sendOnce,
       exclude_mentions: excludeMentions,
+      followers_only: followersOnly,
       auto_comment_reply: autoCommentReply,
       target_type: targetType,
       target_media_id: postPreview ? postPreview.id : extractMediaId(postUrl),
@@ -502,6 +506,14 @@ export default function CreateCampaignDrawer({ isOpen, onClose, onSubmit, isSubm
                     <div className="setting-cb-info">
                       <label htmlFor="cb-mention" className="setting-cb-label">Exclude @Mentions</label>
                       <span className="setting-cb-desc">Skip comments that are @mentions of others</span>
+                    </div>
+                  </div>
+
+                  <div className="setting-checkbox-row">
+                    <input type="checkbox" id="cb-followers" checked={followersOnly} onChange={(e) => setFollowersOnly(e.target.checked)} />
+                    <div className="setting-cb-info">
+                      <label htmlFor="cb-followers" className="setting-cb-label">Followers Only</label>
+                      <span className="setting-cb-desc">Only send DMs to people who follow your page</span>
                     </div>
                   </div>
                 </div>
