@@ -508,14 +508,6 @@ export default function CreateCampaignDrawer({ isOpen, onClose, onSubmit, isSubm
                       <span className="setting-cb-desc">Skip comments that are @mentions of others</span>
                     </div>
                   </div>
-
-                  <div className="setting-checkbox-row">
-                    <input type="checkbox" id="cb-followers" checked={followersOnly} onChange={(e) => setFollowersOnly(e.target.checked)} />
-                    <div className="setting-cb-info">
-                      <label htmlFor="cb-followers" className="setting-cb-label">Followers Only</label>
-                      <span className="setting-cb-desc">Only send DMs to people who follow your page</span>
-                    </div>
-                  </div>
                 </div>
               </>
             )}
