@@ -59,6 +59,7 @@ function MessageStep({ step, onUpdate, onDelete }) {
               }}
             />
             <button
+              type="button"
               onClick={() => {
                 const newQr = [...(step.quickReplies || [])];
                 newQr.splice(idx, 1);
@@ -70,6 +71,7 @@ function MessageStep({ step, onUpdate, onDelete }) {
         ))}
         {!(step.quickReplies && step.quickReplies.length >= 3) && (
           <button
+            type="button"
             onClick={() => {
               const newQr = [...(step.quickReplies || []), { text: '' }];
               onUpdate({ ...step, quickReplies: newQr });
