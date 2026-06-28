@@ -110,25 +110,10 @@ function ButtonTemplateStep({ step, onUpdate, onDelete }) {
 
         {slides[activeSlide] && (
           <div className="slide-editor animation-fade-in">
-            <label 
-              className="slide-dropzone" 
-              onDrop={(e) => handleDrop(e, activeSlide)}
-              onDragOver={handleDragOver}
-              style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}
-            >
-              <input 
-                type="file" 
-                accept="image/*" 
-                style={{ display: 'none' }} 
-                onChange={(e) => handleImageUpload(activeSlide, e.target.files[0])} 
-              />
-              {slides[activeSlide].image ? (
-                <img src={slides[activeSlide].image} alt="Slide Preview" style={{ maxHeight: '100px', maxWidth: '100%', objectFit: 'contain', marginBottom: '8px', borderRadius: '4px' }} />
-              ) : (
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '24px', height: '24px', marginBottom: '8px' }}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
-              )}
-              <p style={{ margin: 0, fontSize: '12px' }}>{slides[activeSlide].image ? 'Change Image' : 'Drop Image Here or Click to Upload'}</p>
-            </label>
+            <div className="form-group" style={{ marginBottom: '12px' }}>
+              <label>Image URL (Optional)</label>
+              <input type="url" className="form-input" placeholder="https://... (Public Image URL)" value={slides[activeSlide].image || ''} onChange={(e) => handleUpdateSlide(activeSlide, 'image', e.target.value)} />
+            </div>
 
             <div className="form-group" style={{ marginBottom: '12px' }}>
               <label>Title</label>
