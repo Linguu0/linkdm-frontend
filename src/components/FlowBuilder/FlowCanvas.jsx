@@ -3,6 +3,7 @@ import '../../styles/flow-builder.css';
 
 const STEP_TYPES = [
   { type: 'message', label: 'Send Message', icon: '💬', color: '#a78bfa' },
+  { type: 'button_message', label: 'Button Message', icon: '🔘', color: '#60a5fa' },
   { type: 'delay', label: 'Add Delay', icon: '⏱️', color: '#fbbf24' },
   { type: 'condition', label: 'Add Condition', icon: '🔀', color: '#34d399' },
 ];
@@ -44,6 +45,43 @@ function MessageStep({ step, onUpdate, onDelete }) {
     </div>
   );
 }
+
+function ButtonMessageStep({ step, onUpdate, onDelete }) {
+  return (
+    <div className="fb-card fb-button-message-card">
+      <div className="fb-card-header">
+        <div className="fb-card-icon" style={{ background: 'rgba(96,165,250,0.15)', color: '#60a5fa' }}>🔘</div>
+        <span className="fb-card-type">Button Message</span>
+        <button className="fb-delete-btn" onClick={onDelete} title="Delete step">✕</button>
+      </div>
+      <textarea
+        className="fb-message-input"
+        placeholder="Text above the button..."
+        value={step.text || ''}
+        onChange={(e) => onUpdate({ ...step, text: e.target.value })}
+        rows={2}
+      />
+      <div className="fb-button-config">
+        <input
+          type="text"
+          className="fb-button-input"
+          placeholder="Button Label (e.g. Get sneak peek)"
+          value={step.btnLabel || ''}
+          onChange={(e) => onUpdate({ ...step, btnLabel: e.target.value })}
+          maxLength={20}
+        />
+        <input
+          type="url"
+          className="fb-button-input"
+          placeholder="Button URL (e.g. https://...)"
+          value={step.btnUrl || ''}
+          onChange={(e) => onUpdate({ ...step, btnUrl: e.target.value })}
+        />
+      </div>
+    </div>
+  );
+}
+
 
 function DelayStep({ step, onUpdate, onDelete }) {
   return (
@@ -161,6 +199,11 @@ export default function FlowCanvas({ initialData, keyword, onChange }) {
   const addStep = useCallback((type, afterIndex) => {
     const newStep = { id: newId(), type };
     if (type === 'message') newStep.text = '';
+    if (type === 'button_message') {
+      newStep.text = '';
+      newStep.btnLabel = '';
+      newStep.btnUrl = '';
+    }
     if (type === 'delay') { newStep.duration = 1; newStep.unit = 'minutes'; }
     if (type === 'condition') newStep.matchKeywords = '';
 
@@ -192,6 +235,7 @@ export default function FlowCanvas({ initialData, keyword, onChange }) {
 
     switch (step.type) {
       case 'message': return <MessageStep {...props} />;
+      case 'button_message': return <ButtonMessageStep {...props} />;
       case 'delay': return <DelayStep {...props} />;
       case 'condition': return <ConditionStep {...props} />;
       default: return <MessageStep {...props} />;
